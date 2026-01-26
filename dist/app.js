@@ -7,11 +7,17 @@ const express_1 = __importDefault(require("express"));
 const body_parser_1 = __importDefault(require("body-parser"));
 const swagger_jsdoc_1 = __importDefault(require("swagger-jsdoc"));
 const swagger_ui_express_1 = __importDefault(require("swagger-ui-express"));
+const mongoose_1 = __importDefault(require("mongoose"));
 // controllers
 const games_1 = __importDefault(require("./controllers/games"));
 const app = (0, express_1.default)();
 // configure app globally to parse http request bodies as json
 app.use(body_parser_1.default.json());
+// db connection
+const dbUri = process.env.DB;
+mongoose_1.default.connect(dbUri)
+    .then(() => { console.log('Connected to MongoDB'); })
+    .catch((err) => { console.log(`Connection Failed: ${err.message}`); });
 // url dispatching
 app.use('/api/v1/games', games_1.default);
 // swagger api doc config
@@ -27,7 +33,7 @@ const options = {
 };
 const openApiSpecs = (0, swagger_jsdoc_1.default)(options);
 app.use('/api-docs', swagger_ui_express_1.default.serve);
-// hard-code swagger css & js links using public Content Delivery Network (CDN)
+// hard-code swagger css & js links using public content delivery network (cdn)
 app.get('/api-docs', (req, res) => {
     const html = swagger_ui_express_1.default.generateHTML(openApiSpecs, {
         customCssUrl: 'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui.min.css',
