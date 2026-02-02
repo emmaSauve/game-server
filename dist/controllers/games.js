@@ -4,14 +4,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
+const game_1 = __importDefault(require("../models/game"));
 // instantiate router to map url requests to the correct methods
 const router = express_1.default.Router();
-;
-let games = [
-    { id: 1, title: 'SpongeBob Cosmic Shake' },
-    { id: 2, title: 'Roblox' },
-    { id: 3, title: 'Donkey Kong Country Returns' }
-];
+// mock data for CRUD
+// interface Game {
+//    id: number,
+//    title: string
+//};
+// let games: Game[] = [
+//     { id: 1, title: 'SpongeBob Cosmic Shake' },
+//     { id: 2, title: 'Roblox' },
+//     { id: 3, title: 'Donkey Kong Country Returns' }
+// ];
 /**
  * @swagger
  * /api/v1/games:
@@ -21,7 +26,12 @@ let games = [
  *       200:
  *         description: A list of games
  */
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
+    // use model to query mongodb for game docs
+    const games = await game_1.default.find();
+    if (!games || games.length === 0) {
+        return res.status(404).json({ message: 'No' });
+    }
     return res.status(200).json(games);
 });
 /**
@@ -46,32 +56,49 @@ router.get('/', (req, res) => {
  *       400:
  *         description: Bad request
  */
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
     if (!req.body) {
         return res.status(400).json({ 'err': 'Invalid Request Body' }); // 400: Bad Request
     }
-    // add new game to array from request body
-    games.push(req.body);
+    // add new game to db from request body via Game model
+    await game_1.default.create(req.body);
     return res.status(201).json(); // 201: resource created
 });
 /* PUT: /api/v1/games/35 */
-router.put('/:id', (req, res) => {
-    // search array for id in url param.  Use == as req.params has a type of "any"
-    const index = games.findIndex(g => g.id == req.params.id);
-    if (index === -1) {
-        return res.status(404).json({ 'err': 'Game Not Found' });
+router.put('/:id', async (req, res) => {
+    if (!req.params.id) {
+        return res.status(400).json({ 'error': 'Bad Request - Id parameter missing' });
     }
-    games[index].title = req.body.title; // update array element from http request body
+    await game_1.default.findByIdAndUpdate(req.params.id, req.body);
+    //     // search array for id in url param.  Use == as req.params has a type of "any"
+    //     const index: number = games.findIndex(g => g.id == req.params.id);
+    //     if (index === -1) {
+    //         return res.status(404).json({ 'err': 'Game Not Found' });
+    //     }
+    //     games[index].title = req.body.title; // update array element from http request body
     return res.status(204).json({ 'msg': 'Game Updated' }); // 204: No Content
 });
 /* DELETE: /api/v1/games/35 */
-router.delete('/:id', (req, res) => {
-    // search array for id in url param.  Use == as req.params has a type of "any"
-    const index = games.findIndex(g => g.id == req.params.id);
-    if (index === -1) {
-        return res.status(404).json({ 'err': 'Game Not Found' });
+// router.delete('/:id', (req: Request, res: Response) => {
+//      // search array for id in url param.  Use == as req.params has a type of "any"
+//     const index: number = games.findIndex(g => g.id == req.params.id);
+//     if (index === -1) {
+//         return res.status(404).json({ 'err': 'Game Not Found' });
+//     }
+//     games.splice(index, 1);
+//      return res.status(204).json({ 'msg': 'Game Deleted' }); // 204: No Content
+// })
+router.delete('/:id', async (req, res) => {
+    if (!req.params.id) {
+        return res.status(400).json({ 'error': 'Bad Request - Id parameter missing' });
     }
-    games.splice(index, 1);
+    await game_1.default.findByIdAndDelete(req.params.id);
+    //     // search array for id in url param.  Use == as req.params has a type of "any"
+    //     const index: number = games.findIndex(g => g.id == req.params.id);
+    //     if (index === -1) {
+    //         return res.status(404).json({ 'err': 'Game Not Found' });
+    //     }
+    //     games[index].title = req.body.title; // update array element from http request body
     return res.status(204).json({ 'msg': 'Game Deleted' }); // 204: No Content
 });
 // make controller public

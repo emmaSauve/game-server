@@ -68,7 +68,13 @@ router.post('/', async (req: Request, res: Response) => {
 });
 
 /* PUT: /api/v1/games/35 */
-// router.put('/:id', (req: Request, res: Response) => {
+router.put('/:id', async (req: Request, res: Response) => {
+
+    if (!req.params.id){
+        return res.status(400).json({'error': 'Bad Request - Id parameter missing'});
+    }
+
+    await Game.findByIdAndUpdate(req.params.id, req.body);
 //     // search array for id in url param.  Use == as req.params has a type of "any"
 //     const index: number = games.findIndex(g => g.id == req.params.id);
 
@@ -77,8 +83,8 @@ router.post('/', async (req: Request, res: Response) => {
 //     }
 
 //     games[index].title = req.body.title; // update array element from http request body
-//     return res.status(204).json({ 'msg': 'Game Updated' }); // 204: No Content
-// });
+    return res.status(204).json({ 'msg': 'Game Updated' }); // 204: No Content
+ });
 
 /* DELETE: /api/v1/games/35 */
 // router.delete('/:id', (req: Request, res: Response) => {
@@ -92,6 +98,24 @@ router.post('/', async (req: Request, res: Response) => {
 //     games.splice(index, 1);
 //      return res.status(204).json({ 'msg': 'Game Deleted' }); // 204: No Content
 // })
+
+router.delete('/:id', async (req: Request, res: Response) => {
+
+    if (!req.params.id){
+        return res.status(400).json({'error': 'Bad Request - Id parameter missing'});
+    }
+
+    await Game.findByIdAndDelete(req.params.id);
+//     // search array for id in url param.  Use == as req.params has a type of "any"
+//     const index: number = games.findIndex(g => g.id == req.params.id);
+
+//     if (index === -1) {
+//         return res.status(404).json({ 'err': 'Game Not Found' });
+//     }
+
+//     games[index].title = req.body.title; // update array element from http request body
+    return res.status(204).json({ 'msg': 'Game Deleted' }); // 204: No Content
+ });
 
 // make controller public
 export default router;
