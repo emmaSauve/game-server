@@ -4,10 +4,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const body_parser_1 = __importDefault(require("body-parser"));
-const swagger_jsdoc_1 = __importDefault(require("swagger-jsdoc"));
+const body_parser_1 = __importDefault(require("body-parser")); // accept json body in POST / PUT requests
+const swagger_jsdoc_1 = __importDefault(require("swagger-jsdoc")); // api doc generator
 const swagger_ui_express_1 = __importDefault(require("swagger-ui-express"));
-const mongoose_1 = __importDefault(require("mongoose"));
+const mongoose_1 = __importDefault(require("mongoose")); // mongodb access lib
 // controllers
 const games_1 = __importDefault(require("./controllers/games"));
 const app = (0, express_1.default)();
@@ -33,7 +33,7 @@ const options = {
 };
 const openApiSpecs = (0, swagger_jsdoc_1.default)(options);
 app.use('/api-docs', swagger_ui_express_1.default.serve);
-// hard-code swagger css & js links using public content delivery network (cdn)
+// hard-code swagger css & js links using public Content Delivery Network (CDN)
 app.get('/api-docs', (req, res) => {
     const html = swagger_ui_express_1.default.generateHTML(openApiSpecs, {
         customCssUrl: 'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui.min.css',
