@@ -13,4 +13,5 @@ router.get('/', gamesController_1.getGames);
 router.post('/', gamesController_1.createGame);
 router.put('/:id', gamesController_1.updateGame);
 router.delete('/:id', gamesController_1.deleteGame);
+router.put('/:id/reviews', gamesController_1.createReview);
 exports.default = router;
