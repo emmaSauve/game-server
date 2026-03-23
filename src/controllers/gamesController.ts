@@ -3,8 +3,6 @@ import Game from '../models/game';
 
 
 
-
-
 /**
  * @swagger
  * /api/v1/games:
@@ -27,6 +25,14 @@ export const getGames = async (req: Request, res: Response) => {
     return res.status(200).json(games);
 };
 
+export const getGame = async(req: Request, res: Response) => {
+    const game = await Game.findById(req.params.id);
+
+    if (!game) {return res.status(404).json({message: 'Game Not Found'})}
+
+    return res.status(200).json(game);
+}
+
 /**
  * @swagger
  * /api/v1/games:
@@ -40,7 +46,7 @@ export const getGames = async (req: Request, res: Response) => {
  *             type: object
  *             properties:
  *               id:
- *                 type: integer
+ *                 type: string
  *               title:
  *                 type: string
  *     responses:

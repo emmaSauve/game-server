@@ -8,18 +8,53 @@ const body_parser_1 = __importDefault(require("body-parser")); // accept json bo
 const swagger_jsdoc_1 = __importDefault(require("swagger-jsdoc")); // api doc generator
 const swagger_ui_express_1 = __importDefault(require("swagger-ui-express"));
 const mongoose_1 = __importDefault(require("mongoose")); // mongodb access lib
-// controllers
+const passport_1 = __importDefault(require("passport"));
+const passport_jwt_1 = require("passport-jwt");
+const cookie_parser_1 = __importDefault(require("cookie-parser"));
+// routers
 const gameRoutes_1 = __importDefault(require("./routes/gameRoutes"));
+const usersRoutes_1 = __importDefault(require("./routes/usersRoutes"));
+// models
+const user_1 = require("./models/user");
 const app = (0, express_1.default)();
 // configure app globally to parse http request bodies as json
 app.use(body_parser_1.default.json());
+// configure cookie parsing so we can read jwt in cookies for auth
+app.use((0, cookie_parser_1.default)());
 // db connection
 const dbUri = process.env.DB;
 mongoose_1.default.connect(dbUri)
     .then(() => { console.log('Connected to MongoDB'); })
     .catch((err) => { console.log(`Connection Failed: ${err.message}`); });
+// passport auth config BEFORE routers that will use passport as auth middleware
+app.use(passport_1.default.initialize());
+passport_1.default.use(user_1.User.createStrategy());
+// link passport to session mgmt
+passport_1.default.serializeUser(user_1.User.serializeUser());
+passport_1.default.deserializeUser(user_1.User.deserializeUser());
+// jwt config
+const jwtOptions = {
+    jwtFromRequest: passport_jwt_1.ExtractJwt.fromAuthHeaderAsBearerToken(),
+    secretOrKey: process.env.PASSPORT_SECRET
+};
+const strategy = new passport_jwt_1.Strategy(jwtOptions, async (jwtPayload, done) => {
+    try {
+        // decrypt token and look up user inside it
+        const user = await user_1.User.findById(jwtPayload.id);
+        if (!user)
+            throw new Error('Invalid User in Token');
+        // user id exists in db, return no error but the user data instead
+        return done(null, user);
+    }
+    catch (error) {
+        // finish callback, returning error but no user data
+        return done(error, null);
+    }
+});
+passport_1.default.use(strategy);
 // url dispatching
 app.use('/api/v1/games', gameRoutes_1.default);
+app.use('/api/v1/users', usersRoutes_1.default);
 // swagger api doc config
 const options = {
     definition: {

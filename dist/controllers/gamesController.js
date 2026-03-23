@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createReview = exports.deleteGame = exports.updateGame = exports.createGame = exports.getGames = void 0;
+exports.createReview = exports.deleteGame = exports.updateGame = exports.createGame = exports.getGame = exports.getGames = void 0;
 const game_1 = __importDefault(require("../models/game"));
 /**
  * @swagger
@@ -25,6 +25,14 @@ const getGames = async (req, res) => {
     return res.status(200).json(games);
 };
 exports.getGames = getGames;
+const getGame = async (req, res) => {
+    const game = await game_1.default.findById(req.params.id);
+    if (!game) {
+        return res.status(404).json({ message: 'Game Not Found' });
+    }
+    return res.status(200).json(game);
+};
+exports.getGame = getGame;
 /**
  * @swagger
  * /api/v1/games:
@@ -38,7 +46,7 @@ exports.getGames = getGames;
  *             type: object
  *             properties:
  *               id:
- *                 type: integer
+ *                 type: string
  *               title:
  *                 type: string
  *     responses:
