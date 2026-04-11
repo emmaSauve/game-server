@@ -2,6 +2,9 @@ import express, { Request, Response } from 'express';
 import { User } from '../models/user';
 import jwt from 'jsonwebtoken'
 
+import {generateOtp, storeOtp, verifyOtp, clearOtp} from '../services/otpService';
+import { sendOtpEmail } from '../services/emailService '
+
 const generateToken = (user: any): string => {
     const payload = {
         id: user._id,
